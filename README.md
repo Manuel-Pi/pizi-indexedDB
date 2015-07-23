@@ -22,9 +22,21 @@ _Exemple:_
 	true
 	 */
 	
-### save(store [String], object  [Object], options  [Object])
+### save(store , objects , options)
 
-Save an object to a specified store. If the database is not already openned, it will be open using the options.dbName and options.dbVersion parameters. Then execute the options.success or options.error callbacks if defined. Return the object filled with id if the store is auto-incremented.
+store [String] The store to save in.
+
+object [Object / Array] The object or array of objects to save.
+
+options [Object] The option object:
+	{
+		success: function(){...}, // Success callback
+		error: function(){...}, // Error callback
+		allSuccess: false, // true if the callback should be called for each saved object
+		addOnly: false // true if you want to use DBObjectStore.add in place of DBObjectStore.put (firing exeption if already existing)
+	} 
+
+Save objects to a specified store. If the database is not already openned, it will be open using the options.dbName and options.dbVersion parameters. Then execute the options.success or options.error callbacks if defined. Return the object filled with id if the store is auto-incremented. If not auto-incremented, need to fill the attribute corresponding to the keyPath of the store. options.allSuccess is set to false by default, meaning the success callback is called only after all objects are saved with the array of saved objets as argument. If set to true the callback is called for each object saved with the object as argument.
 
 _Exemple:_
 

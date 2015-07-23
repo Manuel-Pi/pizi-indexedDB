@@ -73,11 +73,16 @@
 				var objects = object instanceof Array ? object : [object];
 				var transaction = db.transaction([store], "readwrite");
 				var objectStore = transaction.objectStore(store);
+				var saved = [];
 
 				var dealRequest = function(request){
 					if(success){
 						request.onsuccess = function(event) {
-							success(event.target.result);
+							if(!options.allSuccess){
+								success(event.target.result);
+							} else {
+								saved.push(event.target.result);
+							}
 						};
 					}
 					if(options && options.error){
@@ -89,7 +94,7 @@
 
 				if(options && options.allSuccess){
 					transaction.oncomplete = function(event) {
-						options.allSuccess();
+						options.allSuccess(saved);
 					};
 				}
 				
