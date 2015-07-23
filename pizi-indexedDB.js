@@ -43,7 +43,7 @@
 		var open = function(options){
 			if(db){
 				if(options && options.success){
-					options.success();
+					options.success(db);
 				}
 			} else {
 				var request = indexedDB.open(options.dbName, options.dbVersion);
@@ -56,7 +56,7 @@
 				request.onsuccess = function(event) {
 					db = this.result;
 					if(options && options.success){
-						options.success();
+						options.success(db);
 					}
 				};
 				request.onupgradeneeded = function(event) {
