@@ -1,0 +1,6 @@
+{
+  "name": "pizi-indexedDB",
+  "version": "0.0.1",
+  "author": "Manuel Pi",
+  "main": "pizi-indexedDB.js"
+}
