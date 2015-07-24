@@ -111,7 +111,7 @@ _Exemple:_
 		error: function(){...}, // Error callback
 		dbName: "name", // Name of the IDBDatabase
 		dbVersion: "1", // Version of the database
-		allSuccess: false // true if the callback should be called for each deleted object
+		allSuccess: false // true if the callback should be called for each getted object
 	} 
 
 Get the value at the sepcified keys in the store. Then, execute the options.success callback. options.allSuccess is set to false by default, meaning the success callback is called only after all objects are getted with the array of objets as argument. If set to true the callback is called for each object getted with the object as argument.
@@ -129,3 +129,19 @@ _Exemple:_
 	/* Outpout result
 	"Bernard"
 	 */
+
+###getAll(store, options)
+
+**store [String]** The store to get values from.
+
+**options [Object]** The option object:
+
+	{
+		success: function(){...}, // Success callback
+		error: function(){...}, // Error callback
+		dbName: "name", // Name of the IDBDatabase
+		dbVersion: "1", // Version of the database
+		allSuccess: false // true if the callback should be called for each getted object
+	} 
+
+Get all the value from the specified store. Then, execute the options.success callback. options.allSuccess is set to false by default, meaning the success callback is called only after all objects are getted with the array of objets as argument. If set to true the callback is called for each object getted with the object as argument.
