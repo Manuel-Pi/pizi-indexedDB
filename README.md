@@ -24,11 +24,12 @@ _Exemple:_
 	
 ### save(store , objects , options)
 
-store [String] The store to save in.
+**store [String]** The store to save in.
 
-object [Object / Array] The object or array of objects to save.
+**object [Object / Array]** The object or array of objects to save.
 
-options [Object] The option object:
+**options [Object]** The option object:
+
 	{
 		success: function(){...}, // Success callback
 		error: function(){...}, // Error callback
@@ -52,6 +53,6 @@ _Exemple:_
 	"Bernard"
 	 */
 	
-### remove(store [String], keys [Array], options [Object])
+### remove(store, keys, options)
 
 Remove the value at the sepcified keys in the store.
