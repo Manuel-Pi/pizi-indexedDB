@@ -94,7 +94,7 @@
 
 				if(options && options.allSuccess){
 					transaction.oncomplete = function(event) {
-						options.allSuccess(saved);
+						options.success(saved);
 					};
 				}
 				
@@ -120,7 +120,9 @@
 				var dealRequest = function(request){
 					if(success){
 						request.onsuccess = function(event) {
-							success();
+							if(!options.allSuccess){
+								success();
+							}
 						};
 					}
 					if(options && options.error){
@@ -132,7 +134,7 @@
 
 				if(options && options.allSuccess){
 					transaction.oncomplete = function(event) {
-						options.allSuccess();
+						options.success();
 					};
 				}
 				
@@ -155,8 +157,12 @@
 				var dealRequest = function(request){
 					request.onsuccess = function(event) {
 						if(this.result){
-							if(success){
-								success(this.result);
+							if(success && !options.allSuccess){
+								if(!options.allSuccess){
+									success(event.target.result);
+								} else {
+									objects.push(event.target.result);
+								}
 							}
 						} else {
 							if(options && options.error){

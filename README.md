@@ -144,4 +144,4 @@ _Exemple:_
 		allSuccess: false // true if the callback should be called for each getted object
 	} 
 
-Get all the value from the specified store. Then, execute the options.success callback. options.allSuccess is set to false by default, meaning the success callback is called only after all objects are getted with the array of objets as argument. If set to true the callback is called for each object getted with the object as argument.
+Get all the values from the specified store. Then, execute the options.success callback. options.allSuccess is set to false by default, meaning the success callback is called only after all objects are getted with the array of objets as argument. If set to true the callback is called for each object getted with the object as argument.
