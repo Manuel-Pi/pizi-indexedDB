@@ -124,11 +124,15 @@
 					allSuccess: function(){
 						assert.ok(true, "Model deleted! ");
 						removeProceed();
+						deleteDatabase();
 					}
 				});
 			});
 		}
 	  	
+		function deleteDatabase(){
+			indexedDB.deleteDatabase(root.piziIndexedDB.conf.dbName);
+		}
   </script>
 </body>
 </html>
