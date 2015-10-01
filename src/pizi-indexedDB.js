@@ -1,17 +1,17 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['pizi-indexedDBStores'], factory);
+        define([], factory);
     } else if (typeof module === 'object' && module.exports) {
         // Node. Does not work with strict CommonJS, but
         // only CommonJS-like environments that support module.exports,
         // like Node.
-        module.exports = factory(require('pizi-indexedDBStores'));
+        module.exports = factory();
     } else {
         // Browser globals (root is window)
-        root.iDB = factory(root.indexedDBStores);
+        root.piziIndexedDB = factory();
     }
-}(this, function IndexedDB(indexedDBStores){
+}(this, function IndexedDB(){
 	if(!indexedDB){
 		console.log('IndexedDB not avaiable!');
 		return;
@@ -46,7 +46,7 @@
 					options.success(db);
 				}
 			} else {
-				var request = indexedDB.open(options.dbName, options.dbVersion);
+				var request = indexedDB.open(options.dbName || this.conf.dbName, this.conf.dbVersion);
 				request.onerror = function(event) {
 					console.log('Cannot open database: ' + options.dbName + ' v:' + options.dbVersion);
 					if(options && options.error){
@@ -61,7 +61,7 @@
 				};
 				request.onupgradeneeded = function(event) {
 					db = this.result;
-					buildStores(version);
+					buildStores(options.dbVersion);
 				};
 			}
 		};

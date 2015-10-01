@@ -1,0 +1,23 @@
+{
+	"dbName": "testDB",
+	"dbVersion": "1",
+	"stores": {
+		"1": {
+			"user" : {
+				"keyPath": "login",
+				"autoIncrement": true,
+				"indexes": []
+			},
+			"transaction" : {
+				"keyPath": "id",
+				"autoIncrement": true,
+				"indexes" : []
+			},
+			"session" : {
+				"keyPath" : "id",
+				"autoIncrement": true,
+				"indexes" : []
+			}
+		}
+	}
+}

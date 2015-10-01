@@ -9,13 +9,16 @@
   <div id="qunit-fixture"></div>
   <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
   <script src="//code.jquery.com/qunit/qunit-1.18.0.js"></script>
-  <script src="../pizi-indexedDB.js"></script>
+  <script src="pizi-indexedDB.js"></script>
   <script>
 	  	var root = this;
 		QUnit.test( "Root module declaration", function( assert ) {
 			assert.ok( root.piziIndexedDB, "Module initialized!" );
-			assert.ok( root.piziIndexedDB.save, "Save funtion available!" );
-			assert.ok( root.piziIndexedDB.get, "Get funtion available!" );
+			assert.ok( root.piziIndexedDB.open, "Open function available!" );
+			assert.ok( root.piziIndexedDB.remove, "Save function available!" );
+			assert.ok( root.piziIndexedDB.get, "Remove function available!" );
+			assert.ok( root.piziIndexedDB.get, "Get function available!" );
+			assert.ok( root.piziIndexedDB.getAll, "GetAll function available!" );
 		});
 	  
 	  	QUnit.test( "AMD module declaration", function( assert ) {
@@ -23,20 +26,29 @@
 			$.getScript("//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.min.js", function(){
 				assert.ok(define, "RequireJs is loaded!");
 				var moduleLoadingDone = assert.async();
-				require(['../pizi-indexedDB'], function(pls){
-					assert.ok(pls, "Module is defined!");
-					assert.ok(pls.save, "Save funtion available!");
-					assert.ok(pls.get, "Get funtion available!");
+				require(['pizi-indexedDB'], function(piziIndexedDB){
+					assert.ok(piziIndexedDB, "Module is defined!");
+					assert.ok( piziIndexedDB.open, "Open function available!" );
+					assert.ok( piziIndexedDB.remove, "Save function available!" );
+					assert.ok( piziIndexedDB.get, "Remove function available!" );
+					assert.ok( piziIndexedDB.get, "Get function available!" );
+					assert.ok( piziIndexedDB.getAll, "GetAll function available!" );
 					moduleLoadingDone();
 				});
-				assert.ok(define, "RequireJs is loaded!");
 				requireLoadingDone();
 			});
 	  	});
-	  
-	  	QUnit.test( "CommonJS module declaration", function( assert ) {
-			assert.ok(false, 'no test!');
+	  	
+		QUnit.test( "Loading store file", function( assert ) {
+			var storesLoadingDone = assert.async();
+			$.getJSON("pizi-indexedDBStores.json", function(json) {
+				assert.ok(json, "Store.json file loaded!");
+				root.piziIndexedDB.conf = json;
+				root.piziIndexedDB.save('test', {foo: 'foo', bar: 'bar'});
+				storesLoadingDone();
+			});
 		});
+	  	
   </script>
 </body>
 </html>
