@@ -20,9 +20,10 @@
 		var db;
 
 		var buildStores = function(ver){
-			if(indexedDBStores){
+			if(this.conf.stores){
+				var indexedDBStores = this.conf.stores;
 				for(var version in indexedDBStores){
-					if(indexedDBStores.hasOwnProperty(version) && version === ""+ver){
+					if(indexedDBStores.hasOwnProperty(version) && version === ver){
 						for(var store in indexedDBStores[version]){
 							if(indexedDBStores[version].hasOwnProperty(store)){
 								var objectStore = db.createObjectStore(store, { keyPath: indexedDBStores[version][store].keyPath, autoIncrement: indexedDBStores[version][store].autoIncrement || false});
@@ -41,14 +42,18 @@
 		};
 
 		var open = function(options){
+			options = options || {};
 			if(db){
 				if(options && options.success){
 					options.success(db);
 				}
 			} else {
-				var request = indexedDB.open(options.dbName || this.conf.dbName, this.conf.dbVersion);
+				var dbName = options.dbName || this.conf.dbName;
+				var dbVersion = options.dbVersion || this.conf.dbVersion;
+				var context = this;
+				var request = indexedDB.open(dbName, dbVersion);
 				request.onerror = function(event) {
-					console.log('Cannot open database: ' + options.dbName + ' v:' + options.dbVersion);
+					console.log('Cannot open database: ' + dbName + ' v:' + dbVersion);
 					if(options && options.error){
 						options.error();
 					}
@@ -61,7 +66,7 @@
 				};
 				request.onupgradeneeded = function(event) {
 					db = this.result;
-					buildStores(options.dbVersion);
+					buildStores.apply(context, [dbVersion]);
 				};
 			}
 		};
@@ -71,7 +76,19 @@
 			var success = options.success;
 			options.success = function(){
 				var objects = object instanceof Array ? object : [object];
-				var transaction = db.transaction([store], "readwrite");
+				var transaction;
+				try {
+					transaction = db.transaction([store], "readwrite");
+				} catch (e) {
+					var err = new Error(e.message + " Store: " + store);
+					err.name = e.name;
+					if(options && options.error){
+						options.error(err);
+					} else {
+						throw err;
+					}
+					return;
+				}
 				var objectStore = transaction.objectStore(store);
 				var saved = [];
 
@@ -106,7 +123,7 @@
 					}
 				}
 			};
-			open(options);
+			open.apply(this, [options]);
 		};
 
 		var remove = function(store, key, options){
@@ -134,7 +151,7 @@
 
 				if(options && options.allSuccess){
 					transaction.oncomplete = function(event) {
-						options.success();
+						options.allSuccess();
 					};
 				}
 				
@@ -142,7 +159,7 @@
 					dealRequest(objectStore.delete(keys[k]));
 				}
 			};
-			open(options);
+			open.apply(this, [options]);
 		};
 
 		var get = function(store, key, options){
@@ -187,7 +204,7 @@
 					dealRequest(objectStore.get(keys[k]));
 				}
 			};
-			open(options);
+			open.apply(this, [options]);
 		};
 
 		var getAll = function(store, options){
@@ -224,7 +241,7 @@
 				
 				dealRequest(objectStore.openCursor());
 			};
-			open(options);
+			open.apply(this, [options]);
 		};
 
 		return {

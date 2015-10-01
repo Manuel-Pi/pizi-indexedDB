@@ -12,6 +12,17 @@
   <script src="pizi-indexedDB.js"></script>
   <script>
 	  	var root = this;
+		var user = {
+			login: 1,
+			foo: 'foo',
+			bar: 'bar'
+		};
+		var user2 = {
+			login: 2,
+			foo: 'foo',
+			bar: 'bar'
+		};
+		
 		QUnit.test( "Root module declaration", function( assert ) {
 			assert.ok( root.piziIndexedDB, "Module initialized!" );
 			assert.ok( root.piziIndexedDB.open, "Open function available!" );
@@ -42,12 +53,81 @@
 		QUnit.test( "Loading store file", function( assert ) {
 			var storesLoadingDone = assert.async();
 			$.getJSON("pizi-indexedDBStores.json", function(json) {
-				assert.ok(json, "Store.json file loaded!");
 				root.piziIndexedDB.conf = json;
-				root.piziIndexedDB.save('test', {foo: 'foo', bar: 'bar'});
+				assert.ok(root.piziIndexedDB.conf, "Store.json file loaded!");
 				storesLoadingDone();
+				saveTest();
 			});
 		});
+		
+		function saveTest(){
+			QUnit.test( "Save model", function( assert ) {
+				var saveProceed = assert.async();
+				root.piziIndexedDB.save('user', user, {
+					success: function(){
+						assert.ok(true, "Model saved!");
+						saveProceed();
+						getTest();
+					}
+				});
+				var saveNotProceed = assert.async();
+				root.piziIndexedDB.save('usedr', user, {
+					error: function(e){
+						assert.ok(true, "Model not saved! " + e.message);
+						saveNotProceed();
+					}
+				});
+			});
+		}
+		
+		function getTest(){
+			QUnit.test( "Get model", function( assert ) {
+				var getProceed = assert.async();
+				root.piziIndexedDB.get('user', user.login, {
+					success: function(u){
+						assert.ok(user.login === u.login, "Model found! ");
+						getProceed();
+						getAllTest();
+					}
+				});
+				var getNotProceed = assert.async();
+				root.piziIndexedDB.get('user', 9998389283, {
+					error: function(){
+						assert.ok(true, "Model not found! ");
+						getNotProceed();
+					}
+				});
+			});
+		}
+		
+		function getAllTest(){
+			QUnit.test( "Get all models", function( assert ) {
+				var getProceed = assert.async();
+				root.piziIndexedDB.save('user', user2, {
+					success: function(){
+						root.piziIndexedDB.getAll('user', {
+							allSuccess: function(users){
+								assert.ok(users.length === 2, "2 models found! ");
+								getProceed();
+								removeTest();
+							}
+						});
+					}
+				});
+			});
+		}
+		
+		function removeTest(){
+			QUnit.test( "Remove models", function( assert ) {
+				var removeProceed = assert.async();
+				root.piziIndexedDB.remove('user', [user.login, user2.login], {
+					allSuccess: function(){
+						assert.ok(true, "Model deleted! ");
+						removeProceed();
+					}
+				});
+			});
+		}
 	  	
   </script>
 </body>

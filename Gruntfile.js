@@ -2,7 +2,7 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		srcFile: 'src/',
 		testFile: 'tests/',
-		serverFolder: 'C:/Users/e_na/Documents/GitHub/pizi-express-server/Apps/pizi-indexedDB/',
+		serverFolder: 'C:/Developppment/Web/Servers/pizi-express-server/Apps/pizi-indexedDB/',
 		jshint: {
 			all: '<%= srcFile %>'
 		},
@@ -22,11 +22,18 @@ module.exports = function(grunt) {
 							dest: '<%= serverFolder %>'
 						}
 					]
-			}
+			},
+		},
+		clean: {
+			options :{
+				force : true
+			},
+			deployDev: '<%= serverFolder %>'
 		}
 	});
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-contrib-clean');
 	
-	grunt.registerTask('deployDev', ['jshint', 'copy:deployDev']);
+	grunt.registerTask('deployDev', ['jshint', 'clean:deployDev', 'copy:deployDev']);
 };
