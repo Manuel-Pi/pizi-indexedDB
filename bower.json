@@ -4,7 +4,7 @@
   "authors": [
   	"Manuel Pi"
   ],
-  "main": "pizi-indexedDB",
+  "main": "build/pizi-indexedDB",
   "ignore": [
     "package.json"
   ]
