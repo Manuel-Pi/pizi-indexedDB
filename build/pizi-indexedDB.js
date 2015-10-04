@@ -37,42 +37,48 @@
 		}
 	};
 
-	var open = function open(options) {
-		options = options || {};
+	var open = function open() {
+		var _this = this;
+
+		var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
 		if (db) {
 			if (options && options.success) {
 				options.success(db);
 			}
 		} else {
-			var dbName = options.dbName || this.conf.dbName;
-			var dbVersion = options.dbVersion || this.conf.dbVersion;
-			var context = this;
-			var request = indexedDB.open(dbName, dbVersion);
-			request.onerror = function (event) {
-				console.log('Cannot open database: ' + dbName + ' v:' + dbVersion);
-				if (options && options.error) {
-					options.error();
-				}
-			};
-			request.onsuccess = function (event) {
-				db = this.result;
-				if (options && options.success) {
-					options.success(db);
-				}
-			};
-			request.onupgradeneeded = function (event) {
-				db = this.result;
-				buildStores.apply(context, [dbVersion]);
-			};
+			(function () {
+				var dbName = options.dbName || _this.conf.dbName;
+				var dbVersion = options.dbVersion || _this.conf.dbVersion;
+				var context = _this;
+				var request = indexedDB.open(dbName, dbVersion);
+				request.onerror = function (event) {
+					console.log('Cannot open database: ' + dbName + ' v:' + dbVersion);
+					if (options && options.error) {
+						options.error();
+					}
+				};
+				request.onsuccess = function (event) {
+					db = this.result;
+					if (options && options.success) {
+						options.success(db);
+					}
+				};
+				request.onupgradeneeded = function (event) {
+					db = this.result;
+					buildStores.apply(context, [dbVersion]);
+				};
+			})();
 		}
 	};
 
-	var save = function save(store, object, options) {
-		options = options || {};
+	var save = function save(store, object) {
+		var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
 		var success = options.success;
 		options.success = function () {
 			var objects = object instanceof Array ? object : [object];
-			var transaction;
+			var transaction = undefined;
 			try {
 				transaction = db.transaction([store], "readwrite");
 			} catch (e) {
@@ -122,7 +128,9 @@
 		open.apply(this, [options]);
 	};
 
-	var remove = function remove(store, key, options) {
+	var remove = function remove(store, key) {
+		var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
 		options = options || {};
 		var success = options.success;
 		options.success = function () {
@@ -158,8 +166,9 @@
 		open.apply(this, [options]);
 	};
 
-	var get = function get(store, key, options) {
-		options = options || {};
+	var get = function get(store, key) {
+		var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
 		var success = options.success;
 		options.success = function () {
 			var keys = key instanceof Array ? key : [key];
@@ -203,8 +212,9 @@
 		open.apply(this, [options]);
 	};
 
-	var getAll = function getAll(store, options) {
-		options = options || {};
+	var getAll = function getAll(store) {
+		var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
 		var success = options.success;
 		options.success = function () {
 			var transaction = db.transaction([store], "readwrite");

@@ -2,13 +2,13 @@ var db;
 
 var buildStores = function(ver){
 	if(this.conf.stores){
-		var indexedDBStores = this.conf.stores;
-		for(var version in indexedDBStores){
+		let indexedDBStores = this.conf.stores;
+		for(let version in indexedDBStores){
 			if(indexedDBStores.hasOwnProperty(version) && version === ver){
-				for(var store in indexedDBStores[version]){
+				for(let store in indexedDBStores[version]){
 					if(indexedDBStores[version].hasOwnProperty(store)){
-						var objectStore = db.createObjectStore(store, { keyPath: indexedDBStores[version][store].keyPath, autoIncrement: indexedDBStores[version][store].autoIncrement || false});
-						for(var index in indexedDBStores[version][store].indexes){
+						let objectStore = db.createObjectStore(store, { keyPath: indexedDBStores[version][store].keyPath, autoIncrement: indexedDBStores[version][store].autoIncrement || false});
+						for(let index in indexedDBStores[version][store].indexes){
 							if(indexedDBStores[version][store].indexes.hasOwnProperty(index)){
 								objectStore.createIndex(index, index, { unique: false });
 							}
@@ -22,17 +22,16 @@ var buildStores = function(ver){
 	}
 };
 
-var open = function(options){
-	options = options || {};
+var open = function(options = {}){
 	if(db){
 		if(options && options.success){
 			options.success(db);
 		}
 	} else {
-		var dbName = options.dbName || this.conf.dbName;
-		var dbVersion = options.dbVersion || this.conf.dbVersion;
-		var context = this;
-		var request = indexedDB.open(dbName, dbVersion);
+		let dbName = options.dbName || this.conf.dbName;
+		let dbVersion = options.dbVersion || this.conf.dbVersion;
+		let context = this;
+		let request = indexedDB.open(dbName, dbVersion);
 		request.onerror = function(event) {
 			console.log('Cannot open database: ' + dbName + ' v:' + dbVersion);
 			if(options && options.error){
@@ -52,16 +51,15 @@ var open = function(options){
 	}
 };
 
-var save = function(store, object, options){
-	options = options || {};
-	var success = options.success;
+var save = function(store, object, options = {}){
+	let success = options.success;
 	options.success = function(){
-		var objects = object instanceof Array ? object : [object];
-		var transaction;
+		let objects = object instanceof Array ? object : [object];
+		let transaction;
 		try {
 			transaction = db.transaction([store], "readwrite");
 		} catch (e) {
-			var err = new Error(e.message + " Store: " + store);
+			let err = new Error(e.message + " Store: " + store);
 			err.name = e.name;
 			if(options && options.error){
 				options.error(err);
@@ -70,10 +68,10 @@ var save = function(store, object, options){
 			}
 			return;
 		}
-		var objectStore = transaction.objectStore(store);
-		var saved = [];
+		let objectStore = transaction.objectStore(store);
+		let saved = [];
 
-		var dealRequest = function(request){
+		let dealRequest = function(request){
 			if(success){
 				request.onsuccess = function(event) {
 					if(!options.allSuccess){
@@ -96,7 +94,7 @@ var save = function(store, object, options){
 			};
 		}
 		
-		for (var obj in objects){
+		for (let obj in objects){
 			if(options && options.addOnly){
 				dealRequest(objectStore.add(objects[obj]));
 			} else {
@@ -107,15 +105,15 @@ var save = function(store, object, options){
 	open.apply(this, [options]);
 };
 
-var remove = function(store, key, options){
+var remove = function(store, key, options = {}){
 	options = options || {};
-	var success = options.success;
+	let success = options.success;
 	options.success = function(){
-		var keys = key instanceof Array ? key : [key];
-		var transaction = db.transaction([store], "readwrite");
-		var objectStore = transaction.objectStore(store);
+		let keys = key instanceof Array ? key : [key];
+		let transaction = db.transaction([store], "readwrite");
+		let objectStore = transaction.objectStore(store);
 
-		var dealRequest = function(request){
+		let dealRequest = function(request){
 			if(success){
 				request.onsuccess = function(event) {
 					if(!options.allSuccess){
@@ -136,23 +134,22 @@ var remove = function(store, key, options){
 			};
 		}
 		
-		for (var k in keys){
+		for (let k in keys){
 			dealRequest(objectStore.delete(keys[k]));
 		}
 	};
 	open.apply(this, [options]);
 };
 
-var get = function(store, key, options){
-	options = options || {};
-	var success = options.success;
+var get = function(store, key, options = {}){
+	let success = options.success;
 	options.success = function(){
-		var keys = key instanceof Array ? key : [key];
-		var transaction = db.transaction([store], "readwrite");
-		var objectStore = transaction.objectStore(store);
-		var objects = [];
+		let keys = key instanceof Array ? key : [key];
+		let transaction = db.transaction([store], "readwrite");
+		let objectStore = transaction.objectStore(store);
+		let objects = [];
 
-		var dealRequest = function(request){
+		let dealRequest = function(request){
 			request.onsuccess = function(event) {
 				if(this.result){
 					if(success && !options.allSuccess){
@@ -181,24 +178,23 @@ var get = function(store, key, options){
 			};
 		}
 		
-		for(var k in keys){
+		for(let k in keys){
 			dealRequest(objectStore.get(keys[k]));
 		}
 	};
 	open.apply(this, [options]);
 };
 
-var getAll = function(store, options){
-	options = options || {};
-	var success = options.success;
+var getAll = function(store, options = {}){
+	let success = options.success;
 	options.success = function(){
-		var transaction = db.transaction([store], "readwrite");
-		var objectStore = transaction.objectStore(store);
-		var objects = [];
+		let transaction = db.transaction([store], "readwrite");
+		let objectStore = transaction.objectStore(store);
+		let objects = [];
 
-		var dealRequest = function(request){
+		let dealRequest = function(request){
 			request.onsuccess = function(event) {
-				var cursor = event.target.result;
+				let cursor = event.target.result;
 				if (cursor) {
 					if(success){
 						success(cursor.value);
