@@ -24,7 +24,7 @@ var buildStores = function(ver){
 
 var open = function(options = {}){
 	if(db){
-		if(options && options.success){
+		if(options.success){
 			options.success(db);
 		}
 	} else {
