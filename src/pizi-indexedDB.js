@@ -161,7 +161,9 @@ var get = function(store, key, options = {}){
 					}
 				} else {
 					if(options && options.error){
-						options.error(this.error);
+						let err = new Error("Model not found");
+						err.name = "ModelNotFound";
+						options.error(err);
 					}
 				}
 			};
