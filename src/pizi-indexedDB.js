@@ -160,14 +160,14 @@ var get = function(store, key, options = {}){
 						}
 					}
 				} else {
-					if(options && options.error){
+					if(options.error){
 						let err = new Error("Model not found");
 						err.name = "ModelNotFound";
 						options.error(err);
 					}
 				}
 			};
-			if(options && options.error){
+			if(options.error){
 				request.onerror = function(event) {
 					options.error(this.error);
 				};
