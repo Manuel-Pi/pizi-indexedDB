@@ -43,7 +43,7 @@
 		var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
 		if (db) {
-			if (options && options.success) {
+			if (options.success) {
 				options.success(db);
 			}
 		} else {
@@ -188,7 +188,9 @@
 						}
 					} else {
 						if (options && options.error) {
-							options.error(this.error);
+							var err = new Error("Model not found");
+							err.name = "ModelNotFound";
+							options.error(err);
 						}
 					}
 				};
