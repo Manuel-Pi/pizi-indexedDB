@@ -1,6 +1,6 @@
 var db;
 
-var buildStores = function(ver){
+function buildStores (ver){
 	if(this.conf.stores){
 		let indexedDBStores = this.conf.stores;
 		for(let version in indexedDBStores){
@@ -18,11 +18,11 @@ var buildStores = function(ver){
 			}
 		}
 	} else {
-		console.log('indexedDBStores.js is not valid!');
+		console.log('conf.stores is not defined!');
 	}
-};
+}
 
-var open = function(options = {}){
+function open(options = {}){
 	if(db){
 		if(options.success){
 			options.success(db);
@@ -49,11 +49,11 @@ var open = function(options = {}){
 			buildStores.apply(context, [dbVersion]);
 		};
 	}
-};
+}
 
-var save = function(store, object, options = {}){
+function save(store, object, options = {}){
 	let success = options.success;
-	options.success = function(){
+	options.success = () => {
 		let objects = object instanceof Array ? object : [object];
 		let transaction;
 		try {
@@ -61,7 +61,7 @@ var save = function(store, object, options = {}){
 		} catch (e) {
 			let err = new Error(e.message + " Store: " + store);
 			err.name = e.name;
-			if(options && options.error){
+			if(options.error){
 				options.error(err);
 			} else {
 				throw err;
@@ -71,31 +71,32 @@ var save = function(store, object, options = {}){
 		let objectStore = transaction.objectStore(store);
 		let saved = [];
 
-		let dealRequest = function(request){
-			if(success){
-				request.onsuccess = function(event) {
-					if(!options.allSuccess){
-						success(event.target.result);
-					} else {
-						saved.push(event.target.result);
-					}
-				};
-			}
-			if(options && options.error){
+		let dealRequest = (request) => {
+			
+			request.onsuccess = function(event) {
+				if(success){
+					success(event.target.result);
+				} 
+				if(options.allSuccess){
+					saved.push(event.target.result);
+				}
+			};
+
+			if(options.error){
 				request.onerror = function(event) {
 					options.error(this.error);
 				};
 			}
 		};
 
-		if(options && options.allSuccess){
+		if(options.allSuccess){
 			transaction.oncomplete = function(event) {
-				options.success(saved);
+				options.allSuccess(saved);
 			};
 		}
 		
 		for (let obj in objects){
-			if(options && options.addOnly){
+			if(options.addOnly){
 				dealRequest(objectStore.add(objects[obj]));
 			} else {
 				dealRequest(objectStore.put(objects[obj]));
@@ -103,61 +104,59 @@ var save = function(store, object, options = {}){
 		}
 	};
 	open.apply(this, [options]);
-};
+}
 
-var remove = function(store, key, options = {}){
+function remove(store, key, options = {}){
 	options = options || {};
 	let success = options.success;
-	options.success = function(){
+	options.success = () => {
 		let keys = key instanceof Array ? key : [key];
 		let transaction = db.transaction([store], "readwrite");
 		let objectStore = transaction.objectStore(store);
 
-		let dealRequest = function(request){
+		let dealRequest = (request, key) => {
+			request.deletedKey = key;
 			if(success){
 				request.onsuccess = function(event) {
-					if(!options.allSuccess){
-						success();
-					}
+					success(event.deletedKey);
 				};
 			}
-			if(options && options.error){
+			if(options.error){
 				request.onerror = function(event) {
 					options.error(this.error);
 				};
 			}
 		};
 
-		if(options && options.allSuccess){
-			transaction.oncomplete = function(event) {
+		if(options.allSuccess){
+			transaction.oncomplete = (event) => {
 				options.allSuccess();
 			};
 		}
 		
 		for (let k in keys){
-			dealRequest(objectStore.delete(keys[k]));
+			dealRequest(objectStore.delete(keys[k]), keys[k]);
 		}
 	};
 	open.apply(this, [options]);
-};
+}
 
-var get = function(store, key, options = {}){
+function get(store, key, options = {}){
 	let success = options.success;
-	options.success = function(){
+	options.success = () => {
 		let keys = key instanceof Array ? key : [key];
 		let transaction = db.transaction([store], "readwrite");
 		let objectStore = transaction.objectStore(store);
 		let objects = [];
 
-		let dealRequest = function(request){
+		let dealRequest = (request) => {
 			request.onsuccess = function(event) {
 				if(this.result){
-					if(success && !options.allSuccess){
-						if(!options.allSuccess){
-							success(event.target.result);
-						} else {
-							objects.push(event.target.result);
-						}
+					if(success){
+						success(event.target.result);
+					} 
+					if (options.allSuccess){
+						objects.push(event.target.result);
 					}
 				} else {
 					if(options.error){
@@ -175,7 +174,7 @@ var get = function(store, key, options = {}){
 		};
 
 		if(options && options.allSuccess){
-			transaction.oncomplete = function(event) {
+			transaction.oncomplete = (event) => {
 				options.allSuccess(objects);
 			};
 		}
@@ -185,16 +184,16 @@ var get = function(store, key, options = {}){
 		}
 	};
 	open.apply(this, [options]);
-};
+}
 
-var getAll = function(store, options = {}){
+function getAll(store, options = {}){
 	let success = options.success;
-	options.success = function(){
+	options.success = () => {
 		let transaction = db.transaction([store], "readwrite");
 		let objectStore = transaction.objectStore(store);
 		let objects = [];
 
-		let dealRequest = function(request){
+		let dealRequest = (request) => {
 			request.onsuccess = function(event) {
 				let cursor = event.target.result;
 				if (cursor) {
@@ -205,15 +204,15 @@ var getAll = function(store, options = {}){
 					cursor.continue();
 				}
 			};
-			if(options && options.error){
+			if(options.error){
 				request.onerror = function(event) {
 					options.error(this.error);
 				};
 			}
 		};
 
-		if(options && options.allSuccess){
-			transaction.oncomplete = function(event) {
+		if(options.allSuccess){
+			transaction.oncomplete = (event) => {
 				options.allSuccess(objects);
 			};
 		}
@@ -221,7 +220,7 @@ var getAll = function(store, options = {}){
 		dealRequest(objectStore.openCursor());
 	};
 	open.apply(this, [options]);
-};
+}
 
 export default {
 	open : open,

@@ -124,6 +124,70 @@
 					allSuccess: function(){
 						assert.ok(true, "Model deleted! ");
 						removeProceed();
+						saveAllNotifTest();
+					}
+				});
+			});
+		}
+		
+		function saveAllNotifTest(){
+			QUnit.test( "Save all models (notification for each model saved)", function( assert ) {
+				var saveProceed = assert.async();
+				assert.expect( 2 );
+				root.piziIndexedDB.save('user', [user, user2] , {
+					success: function(id){
+						assert.ok(true, "Model saved! (id = " +  id + ")");
+					},
+					allSuccess: function(){
+						saveProceed();
+						getNotifTest();
+					}
+				});
+			});
+		}
+		
+		function getNotifTest(){
+			QUnit.test( "Get models (notification for each model found)", function( assert ) {
+				assert.expect( 2 );
+				var getProceed = assert.async();
+				root.piziIndexedDB.get('user', [user.login, user2.login] , {
+					success: function(usr){
+						assert.ok(true, "Model found! (id = " +  usr.login + ")");
+					},
+					allSuccess: function(){
+						getProceed();
+						getAllNotifTest();
+					}
+				});
+			});
+		}
+		
+		function getAllNotifTest(){
+			QUnit.test( "Get all models (notification for each model found)", function( assert ) {
+				assert.expect( 2 );
+				var getProceed = assert.async();
+				root.piziIndexedDB.getAll('user', {
+					success: function(usr){
+						assert.ok(true, "Model found! (id = " +  usr.login + ")");
+					},
+					allSuccess: function(){
+						getProceed();
+						removeNotifTest();
+					}
+				});
+			});
+		}
+		
+		function removeNotifTest(){
+			QUnit.test( "Remove models (notification for each model removed)", function( assert ) {
+				assert.expect( 2 );
+				var removeProceed = assert.async();
+				root.piziIndexedDB.remove('user', [user.login, user2.login] , {
+					success: function(id){
+						assert.ok(true, "Model removed! (id = " +  id + ")");
+					},
+					allSuccess: function(){
+						removeProceed();
 						deleteDatabase();
 					}
 				});

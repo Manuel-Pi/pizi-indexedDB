@@ -15,7 +15,7 @@
 
 	var db;
 
-	var buildStores = function buildStores(ver) {
+	function buildStores(ver) {
 		if (this.conf.stores) {
 			var indexedDBStores = this.conf.stores;
 			for (var version in indexedDBStores) {
@@ -33,11 +33,11 @@
 				}
 			}
 		} else {
-			console.log('indexedDBStores.js is not valid!');
+			console.log('conf.stores is not defined!');
 		}
-	};
+	}
 
-	var open = function open() {
+	function open() {
 		var _this = this;
 
 		var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -70,9 +70,9 @@
 				};
 			})();
 		}
-	};
+	}
 
-	var save = function save(store, object) {
+	function save(store, object) {
 		var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 		var success = options.success;
@@ -84,7 +84,7 @@
 			} catch (e) {
 				var err = new Error(e.message + " Store: " + store);
 				err.name = e.name;
-				if (options && options.error) {
+				if (options.error) {
 					options.error(err);
 				} else {
 					throw err;
@@ -95,30 +95,31 @@
 			var saved = [];
 
 			var dealRequest = function dealRequest(request) {
-				if (success) {
-					request.onsuccess = function (event) {
-						if (!options.allSuccess) {
-							success(event.target.result);
-						} else {
-							saved.push(event.target.result);
-						}
-					};
-				}
-				if (options && options.error) {
+
+				request.onsuccess = function (event) {
+					if (success) {
+						success(event.target.result);
+					}
+					if (options.allSuccess) {
+						saved.push(event.target.result);
+					}
+				};
+
+				if (options.error) {
 					request.onerror = function (event) {
 						options.error(this.error);
 					};
 				}
 			};
 
-			if (options && options.allSuccess) {
+			if (options.allSuccess) {
 				transaction.oncomplete = function (event) {
-					options.success(saved);
+					options.allSuccess(saved);
 				};
 			}
 
 			for (var obj in objects) {
-				if (options && options.addOnly) {
+				if (options.addOnly) {
 					dealRequest(objectStore.add(objects[obj]));
 				} else {
 					dealRequest(objectStore.put(objects[obj]));
@@ -126,9 +127,9 @@
 			}
 		};
 		open.apply(this, [options]);
-	};
+	}
 
-	var remove = function remove(store, key) {
+	function remove(store, key) {
 		var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 		options = options || {};
@@ -138,35 +139,34 @@
 			var transaction = db.transaction([store], "readwrite");
 			var objectStore = transaction.objectStore(store);
 
-			var dealRequest = function dealRequest(request) {
+			var dealRequest = function dealRequest(request, key) {
+				request.deletedKey = key;
 				if (success) {
 					request.onsuccess = function (event) {
-						if (!options.allSuccess) {
-							success();
-						}
+						success(event.deletedKey);
 					};
 				}
-				if (options && options.error) {
+				if (options.error) {
 					request.onerror = function (event) {
 						options.error(this.error);
 					};
 				}
 			};
 
-			if (options && options.allSuccess) {
+			if (options.allSuccess) {
 				transaction.oncomplete = function (event) {
 					options.allSuccess();
 				};
 			}
 
 			for (var k in keys) {
-				dealRequest(objectStore['delete'](keys[k]));
+				dealRequest(objectStore['delete'](keys[k]), keys[k]);
 			}
 		};
 		open.apply(this, [options]);
-	};
+	}
 
-	var get = function get(store, key) {
+	function get(store, key) {
 		var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 		var success = options.success;
@@ -179,22 +179,21 @@
 			var dealRequest = function dealRequest(request) {
 				request.onsuccess = function (event) {
 					if (this.result) {
-						if (success && !options.allSuccess) {
-							if (!options.allSuccess) {
-								success(event.target.result);
-							} else {
-								objects.push(event.target.result);
-							}
+						if (success) {
+							success(event.target.result);
+						}
+						if (options.allSuccess) {
+							objects.push(event.target.result);
 						}
 					} else {
-						if (options && options.error) {
+						if (options.error) {
 							var err = new Error("Model not found");
 							err.name = "ModelNotFound";
 							options.error(err);
 						}
 					}
 				};
-				if (options && options.error) {
+				if (options.error) {
 					request.onerror = function (event) {
 						options.error(this.error);
 					};
@@ -212,9 +211,9 @@
 			}
 		};
 		open.apply(this, [options]);
-	};
+	}
 
-	var getAll = function getAll(store) {
+	function getAll(store) {
 		var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
 		var success = options.success;
@@ -234,14 +233,14 @@
 						cursor['continue']();
 					}
 				};
-				if (options && options.error) {
+				if (options.error) {
 					request.onerror = function (event) {
 						options.error(this.error);
 					};
 				}
 			};
 
-			if (options && options.allSuccess) {
+			if (options.allSuccess) {
 				transaction.oncomplete = function (event) {
 					options.allSuccess(objects);
 				};
@@ -250,7 +249,7 @@
 			dealRequest(objectStore.openCursor());
 		};
 		open.apply(this, [options]);
-	};
+	}
 
 	module.exports = {
 		open: open,
