@@ -1,8 +1,8 @@
 var db;
 
-function buildStores (ver){
-	if(this.conf.stores){
-		let indexedDBStores = this.conf.stores;
+function buildStores(ver, options){
+	let indexedDBStores = options.conf && options.conf.stores || this.conf.stores;
+	if(indexedDBStores){
 		for(let version in indexedDBStores){
 			if(indexedDBStores.hasOwnProperty(version) && version === ver){
 				for(let store in indexedDBStores[version]){
@@ -28,8 +28,8 @@ function open(options = {}){
 			options.success(db);
 		}
 	} else {
-		let dbName = options.dbName || this.conf.dbName;
-		let dbVersion = options.dbVersion || this.conf.dbVersion;
+		let dbName = options.dbName || options.conf && options.conf.dbName || this.conf.dbName;
+		let dbVersion = options.dbVersion || options.conf && options.conf.dbVersion || this.conf.dbVersion;
 		let context = this;
 		let request = indexedDB.open(dbName, dbVersion);
 		request.onerror = function(event) {
@@ -46,7 +46,7 @@ function open(options = {}){
 		};
 		request.onupgradeneeded = function(event) {
 			db = this.result;
-			buildStores.apply(context, [dbVersion]);
+			buildStores.apply(context, [dbVersion, options]);
 		};
 	}
 }
@@ -226,6 +226,6 @@ export default {
 	open : open,
 	save : save,
 	remove : remove,
-	get : get ,
+	get : get,
 	getAll : getAll
 };

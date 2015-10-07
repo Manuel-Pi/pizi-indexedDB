@@ -15,9 +15,9 @@
 
 	var db;
 
-	function buildStores(ver) {
-		if (this.conf.stores) {
-			var indexedDBStores = this.conf.stores;
+	function buildStores(ver, options) {
+		var indexedDBStores = options.conf && options.conf.stores || this.conf.stores;
+		if (indexedDBStores) {
 			for (var version in indexedDBStores) {
 				if (indexedDBStores.hasOwnProperty(version) && version === ver) {
 					for (var store in indexedDBStores[version]) {
@@ -48,8 +48,8 @@
 			}
 		} else {
 			(function () {
-				var dbName = options.dbName || _this.conf.dbName;
-				var dbVersion = options.dbVersion || _this.conf.dbVersion;
+				var dbName = options.dbName || options.conf && options.conf.dbName || _this.conf.dbName;
+				var dbVersion = options.dbVersion || options.conf && options.conf.dbVersion || _this.conf.dbVersion;
 				var context = _this;
 				var request = indexedDB.open(dbName, dbVersion);
 				request.onerror = function (event) {
@@ -66,7 +66,7 @@
 				};
 				request.onupgradeneeded = function (event) {
 					db = this.result;
-					buildStores.apply(context, [dbVersion]);
+					buildStores.apply(context, [dbVersion, options]);
 				};
 			})();
 		}
