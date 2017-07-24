@@ -1,4 +1,3 @@
 tests/
-Gruntfile.js
+node_modules/
 jsconfig.json
-bower.json
